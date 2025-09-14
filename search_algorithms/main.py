@@ -2,15 +2,16 @@
 Порівняти їхню ефективність на основі двох текстів: Стаття_1 і стаття_2"""
 
 import timeit
+
 # 1. Алгоритм Боєра-Мура
-def boyer_moore_search(text, pattern):
+def boyer_moore_algo(text, pattern):
     m = len(pattern)
     n = len(text)
     if m == 0:
         return 0
-    bad_char = [-1] * 256
+    bad_char = {}
     for i in range(m):
-        bad_char[ord(pattern[i])] = i
+        bad_char[pattern[i]] = i
     s = 0
     while s <= n - m:
         j = m - 1
@@ -19,10 +20,11 @@ def boyer_moore_search(text, pattern):
         if j < 0:
             return s
         else:
-            s += max(1, j - bad_char[ord(text[s + j])])
+            s += max(1, j - bad_char.get(text[s + j], -1))
     return -1
+
 # 2. Алгоритм Кнута-Морріса-Пратта
-def kmp_search(text, pattern):
+def kmp_algo(text, pattern):
     def compute_lps(pattern):
         lps = [0] * len(pattern)
         length = 0
@@ -56,9 +58,9 @@ def kmp_search(text, pattern):
             else:
                 i += 1
     return -1
-# 3. Алгоритм Рабіна-Карпа
 
-def rabin_karp_search(text, pattern):
+# 3. Алгоритм Рабіна-Карпа
+def rabin_karp_algo(text, pattern):
     d = 256
     q = 101
     m = len(pattern)
@@ -79,5 +81,37 @@ def rabin_karp_search(text, pattern):
                 t += q
     return -1
 
+with open("стаття 1.txt", encoding="utf-8") as f1:
+    text1 = f1.read()
+with open("стаття 2.txt", encoding="utf-8") as f2:
+    text2 = f2.read()
+
+real_substr1 = "жадібний алгоритм"
+real_substr2 = "рекомендаційні системи"
+fake_substr = "підрядок з іншого Всесвіту"
+
+def measure_time(algorithm, text, pattern):
+    return timeit.timeit(lambda: algorithm(text, pattern), number=10)
+
+algorithms = {
+    "Boyer-Moore": boyer_moore_algo,
+    "KMP": kmp_algo,
+    "Rabin-Karp": rabin_karp_algo
+}
+results = {}
+
+for name, algo in algorithms.items():
+    results[name] = {
+        "стаття 1 (реальна))": measure_time(algo, text1, real_substr1),
+        "стаття 1 (фейкова)": measure_time(algo, text1, fake_substr),
+        "стаття 2 (реальна)": measure_time(algo, text2, real_substr2),
+        "стаття 2 (фейкова)": measure_time(algo, text2, fake_substr),
+    }
+
+print("\nРезультати порівняння:")
+for algo, timings in results.items():
+    print(f"\n{algo}:")
+    for case, time in timings.items():
+        print(f"  {case}: {time:.6f} секунд")
 
 
