@@ -114,4 +114,6 @@ for algo, timings in results.items():
     for case, time in timings.items():
         print(f"  {case}: {time:.6f} секунд")
 
-
+print("\n Статистика текстів:")
+print(f"Стаття 1: {len(text1)} символів, {len(text1.split())} слів")
+print(f"Стаття 2: {len(text2)} символів, {len(text2.split())} слів")
